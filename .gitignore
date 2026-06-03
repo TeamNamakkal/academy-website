@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Temporary files & screenshots
+Temp_Screenshots/
+*.log
+*.tmp
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# Environment & Configuration
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+out/
