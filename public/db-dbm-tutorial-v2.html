@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding dB & dBm | NodalWire Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #1D78C4;
+  --brand-dark: #155a9a;
+  --navy: #060e1a;
+  --muted: #7a9bbf;
+  --bright: #eef4ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #1a1a1a;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 56px;
+  background: rgba(6, 14, 26, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(29, 120, 196, 0.16);
+}
+
+.nav-logo img { height: 94px; width: auto; filter: brightness(0) invert(1); }
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-links a {
+  font-weight: 500;
+  font-size: 15px;
+  color: #fff;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.nav-links > li > a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0;
+  width: 0; height: 1px;
+  background: var(--brand);
+  transition: width 0.25s;
+}
+.nav-links > li > a:hover::after { width: 100%; }
+
+.nav-cta {
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 20px;
+  border: 1px solid #0d449a;
+  border-radius: 6px;
+  color: #fff;
+  background: linear-gradient(180deg, #3495e8 0%, #1568c0 55%, #0f4fa0 100%);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(29,120,196,0.4);
+  transition: filter 0.2s, transform 0.2s;
+}
+.nav-cta:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+.has-dropdown { position: relative; }
+.has-dropdown > a .caret { font-size: 10px; opacity: 0.6; margin-left: 2px; }
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  min-width: 260px;
+  background: rgba(7, 16, 31, 0.97);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(29,120,196,0.18);
+  border-radius: 10px;
+  padding: 8px 0;
+  list-style: none;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.22s;
+  z-index: 600;
+}
+.has-dropdown:hover .nav-dropdown { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.nav-dropdown a { display: block; font-size: 14px; font-weight: 500; color: rgba(238,244,255,0.82); text-decoration: none; padding: 10px 20px; transition: color 0.18s, background 0.18s; }
+.nav-dropdown a:hover { color: #fff; background: rgba(29,120,196,0.12); }
+
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; width: 40px; height: 40px; background: none; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; padding: 0; }
+.nav-hamburger span { display: block; width: 20px; height: 1.5px; background: #fff; border-radius: 2px; transition: transform 0.25s, opacity 0.2s; }
+
+/* Hero */
+.hero { height: 50vh; min-height: 500px; display: flex; position: relative; overflow: hidden; margin-top: 90px; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 100% 70% at 70% 25%, rgba(29,120,196,0.13) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 0% 90%, rgba(29,120,196,0.07) 0%, transparent 60%), var(--navy); z-index: 0; }
+.hero-grid { position: absolute; inset: 0; background-image: radial-gradient(rgba(29,120,196,0.18) 1px, transparent 1px); background-size: 36px 36px; z-index: 1; mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.25) 20%, rgba(0,0,0,0.2) 65%, transparent 100%); }
+.hero-inner { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 32px 88px 48px; max-width: 1160px; margin: 0 auto; width: 100%; }
+.hero-bc { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand); margin-bottom: 24px; display: inline-flex; align-items: center; gap: 10px; width: fit-content; }
+.hero-bc::before { content: ''; display: block; width: 22px; height: 1.5px; background: var(--brand); }
+.hero-bc a { color: inherit; text-decoration: none; }
+.hero h1 { font-size: clamp(28px, 3.5vw, 50px); font-weight: 800; line-height: 1.08; letter-spacing: -0.04em; color: var(--bright); margin-bottom: 20px; }
+.hero-sub { font-size: 15px; font-weight: 400; line-height: 1.78; color: var(--muted); max-width: 510px; }
+
+/* Content */
+body { padding-top: 90px; }
+.content-wrapper { max-width: 1200px; margin: 0 auto; padding: 48px 40px; display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: start; }
+
+/* TOC */
+.toc-sidebar { position: sticky; top: 120px; max-height: calc(100vh - 150px); overflow-y: auto; padding: 24px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e0e0e0; }
+.toc-sidebar h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--navy); margin-bottom: 16px; letter-spacing: 0.05em; }
+.toc-sidebar ul { list-style: none; }
+.toc-sidebar > ul > li { margin-bottom: 12px; }
+.toc-sidebar > ul > li > a { font-size: 14px; font-weight: 600; color: var(--brand); text-decoration: none; display: block; padding: 6px 0; transition: color 0.2s; }
+.toc-sidebar > ul > li > a:hover { color: var(--brand-dark); }
+.toc-sidebar .toc-sub { list-style: none; margin-top: 8px; margin-left: 12px; }
+.toc-sidebar .toc-sub a { font-size: 13px; font-weight: 400; color: #666; text-decoration: none; display: block; padding: 4px 0 4px 8px; border-left: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.toc-sidebar .toc-sub a:hover { color: var(--brand); border-left-color: var(--brand); }
+
+/* Article */
+.article h2 { font-size: 32px; font-weight: 800; color: var(--navy); margin: 48px 0 24px 0; line-height: 1.1; letter-spacing: -0.02em; padding-bottom: 16px; border-bottom: 3px solid var(--brand); }
+.article h2:first-child { margin-top: 0; }
+.article h3 { font-size: 20px; font-weight: 700; color: var(--brand); margin: 32px 0 16px 0; }
+.article p { font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 18px; }
+.article strong { font-weight: 600; color: var(--navy); }
+.article ul { margin: 16px 0 16px 24px; line-height: 1.8; }
+
+/* Boxes */
+.formula-box, .insight-box, .tip-box, .note-box { margin: 24px 0; padding: 20px; border-radius: 10px; border-left: 4px solid; font-size: 14px; line-height: 1.6; }
+.formula-box { background: #f0f7ff; border-left-color: var(--brand); color: #0d1a2e; }
+.insight-box { background: #fef9e7; border-left-color: #e67e22; color: #333; }
+.tip-box { background: #eafaf1; border-left-color: #1e8449; color: #1a3a3a; }
+.note-box { background: #fdedec; border-left-color: #c0392b; color: #3a1a1a; }
+.formula-box code { font-size: 15px; font-weight: 600; color: var(--brand); font-family: 'Courier New', monospace; background: rgba(29,120,196,0.1); padding: 2px 6px; border-radius: 3px; }
+
+/* Tables */
+.table-wrapper { margin: 28px 0; overflow-x: auto; border-radius: 10px; border: 1px solid #e0e0e0; }
+table { width: 100%; border-collapse: collapse; }
+th { background: var(--navy); color: #fff; padding: 14px; text-align: left; font-weight: 700; font-size: 14px; }
+td { padding: 14px; border-bottom: 1px solid #e0e0e0; font-size: 14px; line-height: 1.6; color: #333; }
+tr:hover { background: #f8f9fa; }
+
+/* Navigation */
+.section-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 60px 0 40px 0; padding-top: 40px; border-top: 2px solid #e0e0e0; }
+.nav-btn { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border: 2px solid var(--brand); border-radius: 10px; background: #fff; color: var(--brand); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.25s; }
+.nav-btn:hover { background: var(--brand); color: #fff; transform: translateX(-4px); }
+.nav-btn.next:hover { transform: translateX(4px); }
+
+/* Back to Top */
+#back-to-top { position: fixed; bottom: 32px; right: 32px; width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: #fff; border: none; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(29,120,196,0.35); transition: all 0.25s; z-index: 100; }
+#back-to-top:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(29,120,196,0.45); }
+#back-to-top.show { display: flex; }
+
+/* Footer */
+#footer { background: radial-gradient(ellipse 90% 60% at 8% 30%, rgba(29,120,196,0.11) 0%, transparent 58%), #060e1a; border-top: 1px solid rgba(29,120,196,0.2); margin-top: 80px; }
+.footer-wrap { max-width: 1200px; margin: 0 auto; padding: 48px 40px 0; }
+.footer-top { display: grid; grid-template-columns: 1.4fr 1.1fr 1fr 1fr; gap: 48px; padding-bottom: 36px; }
+.footer-brand-logo { height: 72px; filter: brightness(0) invert(1); margin-bottom: 8px; }
+.footer-tagline { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; margin-bottom: 14px; }
+.footer-desc { font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,0.7); margin-bottom: 20px; max-width: 260px; }
+.footer-col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #eef4ff; margin-bottom: 16px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-size: 13.5px; color: rgba(255,255,255,0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: #fff; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding: 18px 40px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; }
+.footer-copy { font-size: 12.5px; color: rgba(255,255,255,0.5); }
+
+@media (max-width: 1024px) {
+  .content-wrapper { grid-template-columns: 1fr; gap: 32px; }
+  .toc-sidebar { position: relative; top: auto; max-height: none; }
+  .hero-inner { padding: 32px 40px; }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 0 20px; height: 68px; }
+  .nav-logo img { height: 62px; }
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .nav-hamburger { display: flex; }
+  .content-wrapper { padding: 32px 20px; }
+  .hero-inner { padding: 32px 20px; }
+  .article h2 { font-size: 24px; }
+  .section-nav { grid-template-columns: 1fr; }
+  .toc-sidebar { display: none; }
+  #back-to-top { width: 40px; height: 40px; bottom: 24px; right: 24px; }
+}
+</style>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+<!-- End Google Analytics 4 -->
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo" aria-label="NodalWire Academy home">
+    <img src="../assets/Brand_Assets/Logo/fulllogo_transparent.png" alt="NodalWire Academy">
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li class="has-dropdown">
+      <a href="#">Courses <span class="caret">▾</span></a>
+      <ul class="nav-dropdown">
+        <li><a href="wireless.html">Wireless Network Engineering</a></li>
+        <li><a href="fiber.html">Optical Network Engineering</a></li>
+        <li><a href="ipmpls.html">IP &amp; Network Infrastructure</a></li>
+        <li><a href="gis.html">GIS for Telecom</a></li>
+      </ul>
+    </li>
+    <li><a href="tutorials.html">Tutorials</a></li>
+    <li><a href="guestlecture.html">Academic Outreach</a></li>
+    <li><a href="aboutus.html">About Us</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Contact Us</a>
+  <button class="nav-hamburger"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-bc"><a href="/">Home</a> › <a href="tutorials.html">Tutorials</a> › Understanding dB &amp; dBm</div>
+    <h1>Understanding dB &amp; dBm<br>in Telecommunications</h1>
+    <p class="hero-sub">Why Not Just Use Watts? — A Complete Beginner-to-Professional Guide</p>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content-wrapper">
+  
+  <!-- TOC -->
+  <aside class="toc-sidebar">
+    <h3>Contents</h3>
+    <ul id="toc-list"></ul>
+  </aside>
+
+  <!-- ARTICLE -->
+  <article class="article" id="article">
+  </article>
+
+</div>
+
+<!-- BACK TO TOP -->
+<button id="back-to-top"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-wrap">
+    <div class="footer-top">
+      <div>
+        <img src="../assets/Brand_Assets/Logo/fulllogo_transparent.png" alt="NodalWire Academy" class="footer-brand-logo">
+        <p class="footer-tagline">Network Engineering Education</p>
+        <p class="footer-desc">The education and knowledge platform of NodalWire LLC — making real-world network engineering accessible.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Learning Tracks</p>
+        <ul class="footer-links">
+          <li><a href="#">Microwave Networks</a></li>
+          <li><a href="#">Optical Networks</a></li>
+          <li><a href="#">Wi-Fi Networks</a></li>
+          <li><a href="#">IoT Networks</a></li>
+          <li><a href="#">GIS for Telecom</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Quick Links</p>
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="#programs">Courses</a></li>
+          <li><a href="tutorials.html">Tutorials</a></li>
+          <li><a href="https://www.youtube.com/@nodalwire" target="_blank">YouTube</a></li>
+          <li><a href="aboutus.html">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Contact</p>
+        <p style="font-size: 13.5px; color: rgba(255,255,255,0.7); line-height: 1.6;">
+          <strong>📧 Email:</strong><br>
+          <a href="mailto:contact@nodalwire.com" style="color: rgba(255,255,255,0.7); text-decoration: none;">contact@nodalwire.com</a><br><br>
+          <strong>📍 Location:</strong><br>Plano, TX
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">&copy; 2025 NodalWire LLC. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// Generate Article Content
+const article = document.getElementById('article');
+const sections = `
+<h2 id="intro">1. Introduction — Why Not Just Use Watts?</h2>
+<p>In telecom networks, signals travel through fibre cables, air, amplifiers, splitters, and connectors. Every component either adds power or takes it away. Engineers must track these changes with precision to confirm a signal arrives strong enough at the destination.</p>
+<p>The natural first instinct is to measure everything in watts. But watts fail quickly in real systems for one simple reason: <strong>the power range is enormous.</strong></p>
+<div class="insight-box">
+  <strong>📊 Figure 1 — Telecom power levels span from milliwatts to nanowatts</strong><br><br>
+  A 5G macro base station transmits at around 40 watts (+46 dBm). By the time that signal reaches a mobile phone several kilometres away — after passing through air, buildings, and the phone's antenna — the received power may be as low as 0.000000000001 W (10⁻¹² W). That is a ratio of 40,000,000,000,000 to 1.
+</div>
+<div class="note-box">
+  <strong>🔍 Figure 2 — 0.000000001 W becomes simply −60 dBm</strong><br><br>
+  Writing and calculating with such extreme numbers every day is impractical. This is why the telecom industry uses dB and dBm.
+</div>
+<p><strong>dB and dBm compress any range of power into small, manageable numbers that can be added and subtracted instead of multiplied and divided.</strong> The entire 40 W to 10⁻¹² W journey is just <strong>+46 dBm to −120 dBm</strong> — a difference of 166 dB that any engineer can calculate mentally.</p>
+
+<h2 id="what-is-db">2. What is dB (Decibel)?</h2>
+<h3 id="mountain-analogy">2.1 The Mountain Analogy</h3>
+<p>Picture two mountains side by side. Mountain A is clearly taller than Mountain B. That statement tells you the relative difference in height — but nothing about the actual height of either mountain. You cannot say whether Mountain A is 500 m tall or 5,000 m tall.</p>
+<div class="tip-box">
+  <strong>🏔️ Figure 3 — dB is like the height difference between two mountains</strong><br><br>
+  This is precisely what dB measures. It is always a comparison between two power levels — never an absolute measurement on its own. In a fibre link, P_in enters the cable and P_out exits. The dB value tells you how much power was lost — the difference, just like the difference in height between the two mountains.
+</div>
+
+<h3 id="db-formula">2.2 The dB Formula</h3>
+<div class="formula-box">
+  <strong>📐 The Decibel Equation:</strong><br><br>
+  <code>dB = 10 × log₁₀ ( P_out / P_in )</code>
+</div>
+<div class="note-box">
+  <strong>📐 Formula Breakdown</strong><br>
+  • <strong>P_out</strong> = Power leaving the component (output)<br>
+  • <strong>P_in</strong> = Power entering the component (input)<br>
+  • <strong>log₁₀</strong> = Base-10 logarithm<br>
+  • <strong>10 ×</strong> = Converts bels to decibels (1 bel = 10 dB)<br>
+  • <strong>Negative result</strong> = loss (P_out < P_in)<br>
+  • <strong>Positive result</strong> = gain (P_out > P_in)<br>
+  • <strong>Zero result</strong> = no change (P_out = P_in exactly)
+</div>
+
+<h3 id="logarithms">2.3 Why Logarithms? Multiplication Becomes Addition</h3>
+<div class="insight-box">
+  <strong>💡 The Core Insight</strong><br><br>
+  In linear (watts) arithmetic, two components each causing 50% loss:<br>
+  <code>0.5 × 0.5 = 0.25 (25% of power remains)</code><br><br>
+  In dB arithmetic, the identical calculation:<br>
+  <code>−3 dB + (−3 dB) = −6 dB</code><br><br>
+  A real fibre link might have 20+ components. Adding 20 dB numbers takes seconds. Multiplying 20 fractions takes a calculator and introduces errors.
+</div>
+
+<h3 id="db-reference">2.4 Key dB Reference Values</h3>
+<div class="tip-box">
+  <strong>🏛️ The Building Floors Analogy</strong><br><br>
+  +3 dB = go up 3 floors = power doubles<br>
+  +10 dB = go up 10 floors = power ×10<br>
+  −3 dB = go down 3 floors = power halves<br>
+  −10 dB = go down 10 floors = power ÷10<br>
+  All other values are combinations of these two rules.
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>dB Value</th><th>Power Ratio</th><th>Real-World Example</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>0 dB</strong></td><td>×1.0</td><td>No change — output = input</td></tr>
+      <tr><td><strong>+3 dB</strong></td><td>×2.0</td><td>Power doubles</td></tr>
+      <tr><td><strong>+6 dB</strong></td><td>×4.0</td><td>+3 dB twice</td></tr>
+      <tr><td><strong>+10 dB</strong></td><td>×10.0</td><td>Power multiplies by 10</td></tr>
+      <tr><td><strong>−3 dB</strong></td><td>×0.5</td><td>Power halves (splitter loss)</td></tr>
+      <tr><td><strong>−10 dB</strong></td><td>×0.1</td><td>Power multiplies by 0.1</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="what-is-dbm">3. What is dBm (Decibel-Milliwatt)?</h2>
+<h3 id="sea-level">3.1 The Sea Level Analogy</h3>
+<p>Return to the mountain analogy. Knowing Mountain A is taller than Mountain B still does not tell you how tall either mountain actually is. To express an absolute height, you need a universally agreed reference point — a fixed zero. Geographers chose sea level.</p>
+<div class="insight-box">
+  <strong>🌊 Figure 5 — dBm uses 1 mW as sea level: the fixed reference point</strong><br><br>
+  dBm applies the same principle to signal power. It fixes a reference at exactly 1 milliwatt (1 mW), which is defined as 0 dBm. Every signal power is then measured relative to this anchor. A signal above 1 mW is positive dBm. A signal below 1 mW is negative dBm.
+</div>
+
+<h3 id="why-1mw">3.2 Why Specifically 1 mW?</h3>
+<p>Engineers in the 1930s at Bell Labs needed a standard reference to compare telephone equipment across manufacturers. They needed a value that was:</p>
+<ul>
+  <li><strong>Small enough</strong> — telecom signals are weak; watts are too large a unit</li>
+  <li><strong>Large enough</strong> — measurable with instruments of that era</li>
+  <li><strong>Central</strong> — real signal levels sat both above and below it</li>
+  <li><strong>Round</strong> — easy to calculate with</li>
+</ul>
+<p>1 milliwatt satisfied all four requirements. It sits almost exactly in the centre of the practical power range used in real systems.</p>
+
+<h3 id="dbm-formula">3.3 The dBm Formula</h3>
+<div class="formula-box">
+  <strong>📐 The dBm Equation:</strong><br><br>
+  <code>dBm = 10 × log₁₀ ( P / 1 mW )</code>
+</div>
+<div class="note-box">
+  <strong>📐 Formula Breakdown</strong><br>
+  • <strong>P</strong> = The actual signal power you are measuring (in milliwatts)<br>
+  • <strong>1 mW</strong> = The fixed reference — this is what makes it dBm, not dB<br>
+  • <strong>Positive result</strong> = power is above 1 mW<br>
+  • <strong>Negative result</strong> = power is below 1 mW<br>
+  • <strong>0 dBm</strong> = power is exactly 1 mW
+</div>
+
+<h3 id="dbm-table">3.4 dBm Reference Table</h3>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Power in Watts</th><th>Power in mW</th><th>dBm Value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 W</td><td>1000 mW</td><td><strong>+30 dBm</strong></td></tr>
+      <tr><td>0.1 W</td><td>100 mW</td><td><strong>+20 dBm</strong></td></tr>
+      <tr><td>0.001 W (1 mW)</td><td>1 mW</td><td><strong>0 dBm</strong> ✓</td></tr>
+      <tr><td>0.000001 W</td><td>0.001 mW</td><td><strong>−30 dBm</strong></td></tr>
+      <tr><td>0.000000001 W</td><td>0.000001 mW</td><td><strong>−60 dBm</strong></td></tr>
+      <tr><td>0.000000000001 W</td><td>0.000000001 mW</td><td><strong>−90 dBm</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 id="db-dbm-together">3.5 How dB and dBm Work Together</h3>
+<div class="insight-box">
+  <strong>📌 The Golden Rule</strong><br><br>
+  • <strong>dBm + dB = dBm</strong> — absolute + relative = new absolute<br>
+  • <strong>dBm − dBm = dB</strong> — difference between two levels = relative ratio<br>
+  • <strong>dB + dB = dB</strong> — two relative values = total relative change
+</div>
+<p>This combination is what enables all real system engineering. dBm is your absolute anchor; dB values describe every step along the path.</p>
+
+<h2 id="where-used">4. Where Are dB and dBm Used?</h2>
+<h3 id="loss">4.1 Loss — Signal Attenuation</h3>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Component</th><th>Typical Loss (dB)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>SMF fibre G.652 @ 1550 nm</strong></td><td>0.2–0.4 dB/km</td></tr>
+      <tr><td><strong>FC/APC Connector</strong></td><td>0.1–0.2 dB</td></tr>
+      <tr><td><strong>Fusion Splice</strong></td><td>0.02–0.1 dB</td></tr>
+      <tr><td><strong>1×4 Passive Splitter</strong></td><td>7 dB</td></tr>
+      <tr><td><strong>1×8 Passive Splitter</strong></td><td>10 dB</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 id="gain">4.2 Gain — Signal Amplification</h3>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Amplifier Type</th><th>Typical Gain</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>EDFA (Erbium-Doped Fibre Amplifier)</strong></td><td>+15 to +25 dB</td></tr>
+      <tr><td><strong>Raman Amplifier</strong></td><td>+10 to +15 dB</td></tr>
+      <tr><td><strong>RF Power Amplifier</strong></td><td>+20 to +40 dB</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="power-budget">5. Optical Power Budget — Complete Worked Example</h2>
+<p>A power budget is the most important practical application of dB and dBm. It answers one critical engineering question: <strong>will the signal reach the receiver with enough power to work reliably?</strong></p>
+
+<h3 id="gpon-scenario">5.1 Scenario: 10 km GPON Feeder Link</h3>
+<div class="formula-box">
+  <strong>📐 Power Budget Formula</strong><br><br>
+  <code>Received Power (dBm) = Tx Power (dBm) − Total Path Loss (dB)</code><br><br>
+  <strong>Pass condition:</strong> Received Power ≥ Receiver Sensitivity<br>
+  <strong>Fail condition:</strong> Received Power < Receiver Sensitivity
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Component</th><th>Quantity</th><th>Loss/Gain (dB)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>OLT SFP transmit power</strong></td><td>—</td><td><strong>+3.00 dBm</strong></td></tr>
+      <tr><td><strong>SMF fibre (G.652, 1310 nm)</strong></td><td>10 km</td><td>−3.50 dB</td></tr>
+      <tr><td><strong>FC/APC connectors</strong></td><td>4 (2 pairs)</td><td>−1.00 dB</td></tr>
+      <tr><td><strong>Fusion splices</strong></td><td>3</td><td>−0.15 dB</td></tr>
+      <tr><td><strong>1×4 passive splitter</strong></td><td>1</td><td>−7.00 dB</td></tr>
+      <tr><td><strong>Repair/ageing margin</strong></td><td>—</td><td>−3.00 dB</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="insight-box">
+  <strong>🧮 Calculation</strong><br><br>
+  Tx Power = +3.00 dBm<br>
+  Less: Fibre (10 × 0.35) = −3.50 dB<br>
+  Less: Connectors (4 × 0.25) = −1.00 dB<br>
+  Less: Splices (3 × 0.05) = −0.15 dB<br>
+  Less: Splitter loss = −7.00 dB<br>
+  Less: Repair/ageing margin = −3.00 dB<br>
+  ────────────────────────────────────<br>
+  <strong>Received Power at ONT = −11.65 dBm</strong><br>
+  <strong>GPON Class B+ ONT sensitivity: −27 dBm minimum</strong><br>
+  <strong>✓ Result: −11.65 dBm >> −27 dBm → Link passes with 15.35 dB margin.</strong>
+</div>
+
+<div class="tip-box">
+  <strong>💡 What the Margin Means</strong><br><br>
+  15.35 dB of margin means the link can absorb approximately 15 more dB of degradation before the receiver fails. This covers connector ageing, bending losses, and temperature changes over the cable's 20–25 year lifetime. Operators target a minimum of 3–6 dB margin; above 10 dB is considered very healthy.
+</div>
+
+<h2 id="where-use-dbm">6. Where to Use dBm — Absolute Power Measurements</h2>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Use Case</th><th>dBm Role</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Transmitter output</strong></td><td>Launch power specification</td></tr>
+      <tr><td><strong>Receiver sensitivity</strong></td><td>Minimum acceptable signal at Rx input</td></tr>
+      <tr><td><strong>Power meter reading</strong></td><td>Actual signal level at any test point</td></tr>
+      <tr><td><strong>Link budget start</strong></td><td>Anchor from which all losses are subtracted</td></tr>
+      <tr><td><strong>OTDR launch level</strong></td><td>Reference for power vs. distance trace</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="quick-guide">7. Quick Decision Guide — dB or dBm?</h2>
+<div class="formula-box">
+  <strong>One question resolves the choice every time:</strong><br><br>
+  <strong>If you are…</strong><br>
+  ✓ Measuring power at a specific point → Use <strong>dBm</strong><br>
+  ✓ Describing a gain, loss, or ratio → Use <strong>dB</strong>
+</div>
+
+<div class="note-box">
+  <strong>✅ Quick Examples</strong><br>
+  • <strong>dBm:</strong> "The OLT output is +3 dBm." ← absolute level at one point<br>
+  • <strong>dBm:</strong> "Power meter reads −14.7 dBm at the 8 km mark." ← absolute<br>
+  • <strong>dB:</strong> "The 10 km fibre span has 3.5 dB of loss." ← relative change<br>
+  • <strong>dB:</strong> "The EDFA provides +20 dB of gain." ← relative<br>
+  • <strong>dB:</strong> "OSNR is 22 dB." ← ratio
+</div>
+
+<h2 id="summary">8. Summary — dB vs. dBm at a Glance</h2>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr><th>Property</th><th>dB (Decibel)</th><th>dBm (Decibel-Milliwatt)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Type</strong></td><td>Relative ratio</td><td>Absolute power</td></tr>
+      <tr><td><strong>Reference</strong></td><td>Another power level (P_in)</td><td>Fixed: 1 milliwatt</td></tr>
+      <tr><td><strong>0 value means</strong></td><td>No change — P_out = P_in</td><td>Signal is exactly 1 mW</td></tr>
+      <tr><td><strong>Typical use</strong></td><td>Loss specs, gain, SNR, margin</td><td>Tx power, Rx sensitivity, measurements</td></tr>
+      <tr><td><strong>Standalone?</strong></td><td>No — needs two reference points</td><td>Yes — completely defined by itself</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="glossary">9. Glossary of Key Terms</h2>
+<div class="table-wrapper">
+  <table style="font-size: 13.5px;">
+    <thead>
+      <tr><th style="width: 20%;">Term</th><th>Definition</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>dB (Decibel)</strong></td><td>Logarithmic ratio of two power levels. Formula: 10 × log₁₀(P_out / P_in).</td></tr>
+      <tr><td><strong>dBm</strong></td><td>Decibels relative to 1 milliwatt. Absolute power. Formula: 10 × log₁₀(P / 1 mW).</td></tr>
+      <tr><td><strong>Attenuation</strong></td><td>Reduction in signal power. Expressed in dB or dB/km.</td></tr>
+      <tr><td><strong>Gain</strong></td><td>Increase in signal power from an amplifier. Expressed in positive dB.</td></tr>
+      <tr><td><strong>Receiver Sensitivity</strong></td><td>Minimum dBm at which a receiver correctly decodes data.</td></tr>
+      <tr><td><strong>Power Budget</strong></td><td>Tx power minus total losses. Must exceed receiver sensitivity plus margin.</td></tr>
+      <tr><td><strong>EDFA</strong></td><td>Erbium-Doped Fibre Amplifier. All-optical C-band amplifier; +15 to +25 dB gain.</td></tr>
+      <tr><td><strong>GPON</strong></td><td>Gigabit Passive Optical Network (ITU-T G.984). PON standard for FTTH.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="references">10. References</h2>
+<ul>
+  <li><strong>ITU-T G.984 Series.</strong> (2008–2016). Gigabit-capable passive optical networks (GPON).</li>
+  <li><strong>ITU-T G.652.</strong> (2016). Characteristics of a single-mode optical fibre and cable.</li>
+  <li><strong>Lammle, T.</strong> (2020). CCNA Study Guide (Exam 200-301). Sybex / Wiley.</li>
+  <li><strong>Hecht, J.</strong> (2015). Understanding fiber optics (5th ed.). Laser Light Press.</li>
+  <li><strong>Keiser, G.</strong> (2021). Optical fiber communications (5th ed.). McGraw-Hill Education.</li>
+  <li><strong>NodalWire Academy.</strong> (2024). <a href="https://www.youtube.com/@NodalWire" style="color: var(--brand);">dB and dBm explained for telecom engineers</a> [YouTube].</li>
+</ul>
+
+<h2 id="qa">11. Student Q&A — Common Questions Answered</h2>
+
+<h3 id="qa1">Q1: What is the output power of a 5G base station antenna?</h3>
+<p>5G base station output power varies by deployment type. Macro base stations: +40 to +48 dBm (10–63 watts). Small cells: +20 to +30 dBm. The critical point is that this absolute power (+X dBm) is the starting point for your link budget calculation.</p>
+
+<h3 id="qa2">Q2: What is the typical received power at a mobile phone?</h3>
+<p>Received power depends on distance, obstacles, and frequency band:</p>
+<ul>
+  <li><strong>Good signal:</strong> −60 to −80 dBm</li>
+  <li><strong>Acceptable signal:</strong> −80 to −100 dBm</li>
+  <li><strong>Weak signal:</strong> −100 to −120 dBm</li>
+</ul>
+
+<h3 id="qa3">Q3: Why 1 mW specifically?</h3>
+<p>This is historical and practical. In the 1930s, Bell Labs chose 1 mW because it sat in the middle of the practical power range. It is neither too large nor too small, and the logarithmic scale aligned perfectly with real equipment.</p>
+
+<h3 id="qa4">Q4: Do I need to memorize the dB reference table?</h3>
+<p><strong>No.</strong> Remember only two anchor points: +3 dB = power doubles, and +10 dB = power ×10. All other values are combinations.</p>
+
+<h3 id="qa5">Q5: When do we get 0 dB?</h3>
+<p>You get 0 dB whenever P_out equals P_in exactly — regardless of the absolute power level. The absolute value does not matter; only the ratio matters.</p>
+
+<h3 id="qa6">Q6: When do we get ±3 dB?</h3>
+<p>±3 dB occurs whenever power doubles or halves. Example: A 1×2 passive splitter halves power: +3 dBm in, 0 dBm out = −3 dB loss.</p>
+
+<h3 id="qa7">Q7: How does 0.000000001 W equal −60 dBm?</h3>
+<p>Step by step: 0.000000001 W = 0.001 mW. Then: dBm = 10 × log₁₀(0.001 / 1) = 10 × (−3) = −30 dBm. Wait, that's −30 dBm, not −60 dBm! Always use the formula, not mental counting of zeros.</p>
+
+<!-- Navigation -->
+<div class="section-nav">
+  <a href="#intro" class="nav-btn prev">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    Back to Top
+  </a>
+  <a href="tutorials.html" class="nav-btn next">
+    More Tutorials
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </a>
+</div>
+`;
+
+article.innerHTML = sections;
+
+// Generate TOC
+const headings = article.querySelectorAll('h2, h3');
+const tocList = document.getElementById('toc-list');
+let lastH2Li = null;
+
+headings.forEach((heading) => {
+  const id = heading.id;
+  const link = document.createElement('a');
+  link.href = '#' + id;
+  link.textContent = heading.textContent;
+  
+  if (heading.tagName === 'H2') {
+    const li = document.createElement('li');
+    li.appendChild(link);
+    tocList.appendChild(li);
+    lastH2Li = li;
+  } else {
+    if (!lastH2Li.querySelector('ul')) {
+      const ul = document.createElement('ul');
+      ul.className = 'toc-sub';
+      lastH2Li.appendChild(ul);
+    }
+    const li = document.createElement('li');
+    li.appendChild(link);
+    lastH2Li.querySelector('ul').appendChild(li);
+  }
+});
+
+// Back to Top
+const btn = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 300));
+btn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+// Mobile Menu
+const hamburger = document.querySelector('.nav-hamburger');
+const navLinks = document.querySelector('.nav-links');
+if (hamburger) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('mob-open');
+  });
+}
+</script>
+
+</body>
+</html>
