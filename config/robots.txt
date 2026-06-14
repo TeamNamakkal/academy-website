@@ -1,8 +1,0 @@
-# NodalWire Academy — robots.txt
-
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /private/
-
-Sitemap: https://www.nodalwireacademy.com/sitemap.xml
